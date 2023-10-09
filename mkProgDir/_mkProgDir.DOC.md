@@ -4,9 +4,9 @@
 <!-- Markdown documentation at the front by the mkdoc command. -->
 # mkProgDir
 
-This will populate a directory with files suitable to form a skeleton program\.
-There will be TODO comments at various points in the code describing changes or
-additions that need to be made to flesh out the program\.
+This will populate a directory with files suitable to form a skeleton program
+\(Go by default\)\. There will be TODO comments at various points in the code
+describing changes or additions that need to be made to flesh out the program\.
 
 Note that, by default, the generated program will use packages from the param
 module rather than the standard library flag package\. This is available from

@@ -9,7 +9,7 @@ require (
 	github.com/nickwells/macros.mod v1.1.0
 	github.com/nickwells/param.mod/v6 v6.1.3
 	github.com/nickwells/testhelper.mod/v2 v2.3.0
-	github.com/nickwells/verbose.mod v1.1.0
+	github.com/nickwells/verbose.mod v1.1.1
 	github.com/nickwells/versionparams.mod v1.2.6
 )
 
