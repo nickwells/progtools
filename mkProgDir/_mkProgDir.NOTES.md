@@ -29,11 +29,11 @@ values substituted at run time\.
 ## mkProgDir \- Template files \- checks
 To generate checks of the contents of a file, add another entry to the template
 directory with the same name as the file whose contents are to be checked but
-with an additional suffix of &apos;\.mkProgDirCheck&apos; added\. The remainder
-of the name is then checked for an optional ID number used to generate distinct
-names so that multiple checks of the same type can be generated\. Lastly the
-remaining name, after the check suffix and any ID has been removed is checked
-for a final suffix showing what type of check should be performed\. The
+with an additional suffix of &apos;\-\-mkProgDir\-Check&apos; added\. The
+remainder of the name is then checked for an optional ID number used to generate
+distinct names so that multiple checks of the same type can be generated\.
+Lastly the remaining name, after the check suffix and any ID has been removed is
+checked for a final suffix showing what type of check should be performed\. The
 following check\-type suffixes are allowed:
 
 \- \.begins : the contents of the target file begins with the contents of this
@@ -63,7 +63,7 @@ suffix\.
 
 For example, having a file in the template directory called:
 
-   xxx\.contains\.mkProgDirCheck
+   xxx\.contains\-\-mkProgDir\-Check
 
 will generate a check function that will ensure the contents of this file appear
 somewhere in the target file
@@ -76,7 +76,7 @@ creates the file to be checked by the generated function\.
 
 Similarly, having a file in the template directory called:
 
-   xxx\.contains\.1\.mkProgDirCheck\.mkProgDirGen
+   xxx\.contains\.1\-\-mkProgDir\-Check\-\-mkProgDir\-Generate
 
 will generate another check function against &apos;xxx&apos; that will ensure
 the contents of this file appear somewhere in the target file, the difference
@@ -98,9 +98,9 @@ for this entry\.
 
 ## mkProgDir \- Template files \- generated
 To generate a file that is not just a copy of the template file, add the suffix
-&apos;\.mkProgDirGen&apos; to the name of the file\. The contents of the file
-will then be passed through macro substitution before being copied into the
-target directory\. The name of the resulting file will be the name of the
+&apos;\-\-mkProgDir\-Generate&apos; to the name of the file\. The contents of
+the file will then be passed through macro substitution before being copied into
+the target directory\. The name of the resulting file will be the name of the
 template file but with the suffix removed\. The following macro substitutions
 are allowed:
 

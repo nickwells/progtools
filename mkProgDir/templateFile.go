@@ -28,8 +28,8 @@ var templates = map[string]struct {
 }
 
 const (
-	sfxGenerate = ".mkProgDirGen"
-	sfxCheck    = ".mkProgDirCheck"
+	sfxGenerate = "--mkProgDir-Generate"
+	sfxCheck    = "--mkProgDir-Check"
 )
 
 // TemplateFileInfo contains the information about a template file
