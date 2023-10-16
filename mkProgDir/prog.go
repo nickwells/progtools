@@ -234,7 +234,8 @@ func (prog *Prog) CheckDir(path string) bool {
 
 // CheckFile checks that the given file exists, is a file, has the correct
 // permissions and passes the supplied check functions.
-func (prog *Prog) CheckFile(path string, chkFuncs ...checkContentFunc) {
+func (prog *Prog) CheckFile(tfi TemplateFileInfo) {
+	path := tfi.target
 	defer prog.stack.Start("CheckFile",
 		fmt.Sprintf("Start%25s: %q", "file to check", path))()
 	intro := prog.stack.Tag()
@@ -272,6 +273,7 @@ func (prog *Prog) CheckFile(path string, chkFuncs ...checkContentFunc) {
 	}
 	verbose.Printf("%s %30s: %s\n", intro, "", "can be read")
 
+	chkFuncs := prog.fileChecks[tfi.target]
 	if len(chkFuncs) == 0 {
 		return
 	}
@@ -342,7 +344,7 @@ func (prog *Prog) checkFileFunc() fs.WalkDirFunc {
 			return nil
 		}
 
-		prog.CheckFile(tfi.target, prog.fileChecks[tfi.target]...)
+		prog.CheckFile(tfi)
 		return nil
 	}
 }
