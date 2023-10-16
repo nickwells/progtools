@@ -202,6 +202,17 @@ func (prog *Prog) CreateAllFiles() {
 	}
 }
 
+// CheckPerms checks that the expected permissions match the actual and
+// report any discrepancies. This is not done if the checkPerms flag is not
+// set.
+func (prog *Prog) CheckPerms(pathType, path string, exp, act fs.FileMode) {
+	if prog.checkPerms && act != exp {
+		fmt.Printf("%s: %q has unexpected permissions\n", pathType, path)
+		fmt.Printf("\texpected permissions %04o\n", exp)
+		fmt.Printf("\t  actual permissions %04o\n", act)
+	}
+}
+
 // CheckDir checks that the named directory exists and has the expected
 // permissions. It reports any errors and returns false if the path does not
 // refer to a Stat-able directory
@@ -228,13 +239,61 @@ func (prog *Prog) CheckDir(path string) bool {
 		return false
 	}
 	verbose.Printf("%s %30s: %s\n", intro, "", "is a directory")
-	if prog.checkPerms &&
-		fi.Mode()&fs.ModePerm != prog.dirPerms {
-		fmt.Printf("Directory: %q has unexpected permissions\n", path)
-		fmt.Printf("\texpected permissions %04o\n", prog.dirPerms)
-		fmt.Printf("\t  actual permissions %04o\n", fi.Mode()&fs.ModePerm)
-	}
+
+	prog.CheckPerms("Directory", path, prog.dirPerms, fi.Mode()&fs.ModePerm)
+
 	return true
+}
+
+// ReportStatErr checks the error returned by os.Stat and reports it
+// appropriately
+func (prog *Prog) ReportStatErr(tfi TemplateFileInfo, err error) {
+	path := tfi.target
+	defer prog.stack.Start("CheckStatErr",
+		fmt.Sprintf("Start%25s: %q", "file", path))()
+	intro := prog.stack.Tag()
+
+	if os.IsNotExist(err) {
+		isOpt := ""
+		if tfi.isAnOptionalFile {
+			if !prog.reportAllFiles {
+				verbose.Printf("%s %30s: %s\n",
+					intro, "", "file does not exist but is optional")
+				return
+			}
+			isOpt = " (is optional)"
+		}
+
+		fmt.Printf("%q does not exist%s\n", path, isOpt)
+		prog.SetExitStatus(1)
+		return
+	}
+
+	fmt.Printf("Cannot check the file (%q):\n\t%s\n", path, err)
+	prog.SetExitStatus(1)
+}
+
+// CheckContents applies the associated file checks to the contents of the
+// file
+func (prog *Prog) CheckContents(tfi TemplateFileInfo, contents string) {
+	path := tfi.target
+	defer prog.stack.Start("CheckFileContents",
+		fmt.Sprintf("Start%25s: %q", "file to check", path))()
+	intro := prog.stack.Tag()
+
+	chkFuncs := prog.fileChecks[tfi.target]
+	if len(chkFuncs) == 0 {
+		return
+	}
+
+	for _, cf := range chkFuncs {
+		s := cf(path, contents)
+		if s != 0 {
+			prog.SetExitStatus(1)
+			return
+		}
+	}
+	verbose.Printf("%s %30s: %s\n", intro, "", "contents OK")
 }
 
 // CheckFile checks that the given file exists, is a file, has the correct
@@ -247,34 +306,19 @@ func (prog *Prog) CheckFile(tfi TemplateFileInfo) {
 
 	fi, err := os.Stat(path)
 	if err != nil {
-		if os.IsNotExist(err) {
-			if tfi.isAnOptionalFile && !prog.reportAllFiles {
-				verbose.Printf("%s %30s: %s\n",
-					intro, "", "file does not exist but is optional")
-				return
-			}
-
-			fmt.Printf("%q does not exist\n", path)
-			prog.SetExitStatus(1)
-			return
-		}
-		fmt.Printf("Cannot check the file (%q):\n\t%s\n", path, err)
-		prog.SetExitStatus(1)
+		prog.ReportStatErr(tfi, err)
 		return
 	}
 	verbose.Printf("%s %30s: %s\n", intro, "", "file exists")
+
 	if !fi.Mode().IsRegular() {
 		fmt.Printf("%q is not a regular file\n", path)
 		prog.SetExitStatus(1)
 		return
 	}
 	verbose.Printf("%s %30s: %s\n", intro, "", "is a regular file")
-	if prog.checkPerms &&
-		fi.Mode()&fs.ModePerm != prog.filePerms {
-		fmt.Printf("File: %q has unexpected permissions\n", path)
-		fmt.Printf("\texpected permissions %04o\n", prog.filePerms)
-		fmt.Printf("\t  actual permissions %04o\n", fi.Mode()&fs.ModePerm)
-	}
+
+	prog.CheckPerms("File", path, prog.filePerms, fi.Mode()&fs.ModePerm)
 
 	contents, err := os.ReadFile(path)
 	if err != nil {
@@ -284,19 +328,7 @@ func (prog *Prog) CheckFile(tfi TemplateFileInfo) {
 	}
 	verbose.Printf("%s %30s: %s\n", intro, "", "can be read")
 
-	chkFuncs := prog.fileChecks[tfi.target]
-	if len(chkFuncs) == 0 {
-		return
-	}
-
-	for _, cf := range chkFuncs {
-		s := cf(path, string(contents))
-		if s != 0 {
-			prog.SetExitStatus(1)
-			return
-		}
-	}
-	verbose.Printf("%s %30s: %s\n", intro, "", "contents OK")
+	prog.CheckContents(tfi, string(contents))
 }
 
 // CheckAllFiles checks the directory and all the files that it should
