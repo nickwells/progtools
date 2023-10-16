@@ -15,12 +15,13 @@ import (
 )
 
 const (
-	paramNameProgName    = "program-name"
-	paramNameAction      = "action"
-	paramNameCheck       = "check"
-	paramNamePerms       = "permissions"
-	paramNameCheckPerms  = "check-permissions"
-	paramNameTemplateDir = "template-directory"
+	paramNameProgName              = "program-name"
+	paramNameAction                = "action"
+	paramNameCheck                 = "check"
+	paramNamePerms                 = "permissions"
+	paramNameCheckPerms            = "check-permissions"
+	paramNameTemplateDir           = "template-directory"
+	paramNameReportMissingOptFiles = "report-missing-optional-files"
 )
 
 var progNameRE = regexp.MustCompile("[a-zA-Z][-_.a-zA-Z0-9]*")
@@ -131,6 +132,16 @@ func addParams(prog *Prog) param.PSetOptFunc {
 				" different from the given value. This can mean that"+
 				" the created files etc do not have the given"+
 				" permissions (they may have fewer).",
+		)
+
+		ps.Add(paramNameReportMissingOptFiles,
+			psetter.Bool{
+				Value: &prog.reportAllFiles,
+			},
+			"Optional files that are missing from the target"+
+				" directory are reported rather than being"+
+				" silently ignored.",
+			param.AltNames("report-all-files"),
 		)
 
 		ps.AddFinalCheck(func() error {

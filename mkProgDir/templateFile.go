@@ -30,6 +30,7 @@ var templates = map[string]struct {
 const (
 	sfxGenerate = "--mkProgDir-Generate"
 	sfxCheck    = "--mkProgDir-Check"
+	sfxOptional = "--mkProgDir-Optional"
 )
 
 // TemplateFileInfo contains the information about a template file
@@ -43,6 +44,7 @@ type TemplateFileInfo struct {
 	isTheTemplateDir bool
 	isAGenFile       bool
 	isACheckFile     bool
+	isAnOptionalFile bool
 
 	checkTypeSuffix string
 }
@@ -121,6 +123,10 @@ func (prog Prog) getTemplateFileInfo(path string, d fs.DirEntry,
 	}
 	if tfi.isAGenFile {
 		path = strings.TrimSuffix(path, sfxGenerate)
+	}
+	if strings.HasSuffix(path, sfxOptional) {
+		tfi.isAnOptionalFile = true
+		path = strings.TrimSuffix(path, sfxOptional)
 	}
 
 	if strings.HasSuffix(path, sfxCheck) {

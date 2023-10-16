@@ -34,6 +34,8 @@ type Prog struct {
 	templateDirName string
 	templateFS      fs.FS
 
+	reportAllFiles bool
+
 	checkPerms bool
 	filePerms  fs.FileMode
 	dirPerms   fs.FileMode
@@ -131,6 +133,9 @@ func (prog *Prog) makeFileCheck() fs.WalkDirFunc {
 
 		if tfi.isAGenFile {
 			verbose.Printf("%s %30s: %s\n", intro, "", "a generated file")
+		}
+		if tfi.isAnOptionalFile {
+			verbose.Printf("%s %30s: %s\n", intro, "", "an optional file")
 		}
 		if !tfi.isACheckFile {
 			verboseSkipMsg(intro, "not a check file")
@@ -243,6 +248,12 @@ func (prog *Prog) CheckFile(tfi TemplateFileInfo) {
 	fi, err := os.Stat(path)
 	if err != nil {
 		if os.IsNotExist(err) {
+			if tfi.isAnOptionalFile && !prog.reportAllFiles {
+				verbose.Printf("%s %30s: %s\n",
+					intro, "", "file does not exist but is optional")
+				return
+			}
+
 			fmt.Printf("%q does not exist\n", path)
 			prog.SetExitStatus(1)
 			return
