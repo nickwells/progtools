@@ -8,6 +8,7 @@ import (
 	"regexp"
 
 	"github.com/nickwells/check.mod/v2/check"
+	"github.com/nickwells/english.mod/english"
 	"github.com/nickwells/filecheck.mod/filecheck"
 	"github.com/nickwells/location.mod/location"
 	"github.com/nickwells/param.mod/v6/param"
@@ -37,9 +38,12 @@ func addParams(prog *Prog) param.PSetOptFunc {
 						" populate it with the standard files",
 					aCheck: "check that the directory exists and" +
 						" that the standard files are all present.",
+					aFix: "fix the target directory (which should exist) and" +
+						" copy in any missing files.",
 				},
 			},
 			"The action to perform.",
+			param.Attrs(param.CommandLineOnly),
 			param.AltNames("a"),
 		)
 
@@ -63,6 +67,7 @@ func addParams(prog *Prog) param.PSetOptFunc {
 				" the current directory."+
 				" If you are creating the program directory"+
 				" the directory must not exist.",
+			param.Attrs(param.CommandLineOnly),
 			param.AltNames("prog-name", "name"),
 			param.Attrs(param.MustBeSet),
 			param.PostAction(
@@ -132,9 +137,11 @@ func addParams(prog *Prog) param.PSetOptFunc {
 				" different from the given value. This can mean that"+
 				" the created files etc do not have the given"+
 				" permissions (they may have fewer).",
+			param.Attrs(param.CommandLineOnly),
+			param.AltNames("chk-perms"),
 		)
 
-		ps.Add(paramNameReportMissingOptFiles,
+		reportAllParam := ps.Add(paramNameReportMissingOptFiles,
 			psetter.Bool{
 				Value: &prog.reportAllFiles,
 			},
@@ -142,7 +149,20 @@ func addParams(prog *Prog) param.PSetOptFunc {
 				" directory are reported rather than being"+
 				" silently ignored.",
 			param.AltNames("report-all-files"),
+			param.Attrs(param.CommandLineOnly),
 		)
+
+		ps.AddFinalCheck(func() error {
+			if reportAllParam.HasBeenSet() &&
+				prog.action == aCreate {
+				return fmt.Errorf(
+					"you have asked for missing optional files to be"+
+						" shown (at %s) but the action to be performed"+
+						" is still to create the directory",
+					english.Join(reportAllParam.WhereSet(), ", ", " and "))
+			}
+			return nil
+		})
 
 		ps.AddFinalCheck(func() error {
 			if prog.dir == "" {
@@ -154,7 +174,7 @@ func addParams(prog *Prog) param.PSetOptFunc {
 				provisos = filecheck.Provisos{
 					Existence: filecheck.MustNotExist,
 				}
-			case aCheck:
+			case aCheck, aFix:
 				provisos = filecheck.Provisos{
 					Existence: filecheck.MustExist,
 					Checks:    []check.FileInfo{check.FileInfoIsDir},
@@ -162,10 +182,6 @@ func addParams(prog *Prog) param.PSetOptFunc {
 			}
 			return provisos.StatusCheck(prog.dir)
 		})
-		// ps.AddGroup("group-name", "description")
-		// ps.AddExample("example", "description")
-		// ps.AddNote("headline", "text")
-		// ps.AddReference("name", "description")
 
 		return nil
 	}

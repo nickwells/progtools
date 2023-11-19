@@ -18,6 +18,7 @@ type action string
 const (
 	aCreate = action("create")
 	aCheck  = action("check")
+	aFix    = action("fix")
 )
 
 // Prog holds program parameters and status
@@ -168,7 +169,7 @@ func (prog *Prog) Run() {
 	case aCreate:
 		prog.CreateAllFiles()
 		return
-	case aCheck:
+	case aCheck, aFix:
 		prog.setFileChecks()
 		prog.CheckAllFiles()
 		return
@@ -254,6 +255,12 @@ func (prog *Prog) ReportStatErr(tfi TemplateFileInfo, err error) {
 	intro := prog.stack.Tag()
 
 	if os.IsNotExist(err) {
+		if prog.action == aFix {
+			verbose.Printf("%s %30s: %q\n",
+				intro, "fixing missing file", tfi.target)
+			prog.CreateTargetFile(tfi)
+			return
+		}
 		isOpt := ""
 		if tfi.isAnOptionalFile {
 			if !prog.reportAllFiles {
@@ -392,6 +399,17 @@ func (prog *Prog) checkFileFunc() fs.WalkDirFunc {
 	}
 }
 
+// CreateTargetFile creates the target file, filling it with the template
+// contents
+func (prog *Prog) CreateTargetFile(tfi TemplateFileInfo) error {
+	err := os.WriteFile(tfi.target, []byte(tfi.contents), prog.filePerms)
+	if err != nil {
+		fmt.Printf("Can't create %q: %s\n", tfi.target, err)
+		prog.SetExitStatus(1)
+	}
+	return err
+}
+
 // createFileFunc returns a function that will copy a file from the template
 // directory into the target directory or generate it from the template file
 func (prog *Prog) createFileFunc() fs.WalkDirFunc {
@@ -435,9 +453,15 @@ func (prog *Prog) createFileFunc() fs.WalkDirFunc {
 			return err
 		}
 
-		err = os.WriteFile(tfi.target, []byte(tfi.contents), prog.filePerms)
+		err = prog.CreateTargetFile(tfi)
 		if err != nil {
 			fmt.Printf("Can't create %q: %s\n", tfi.target, err)
+			prog.SetExitStatus(1)
+			return err
+		}
+		err = os.WriteFile(tfi.target, []byte(tfi.contents), prog.filePerms)
+		if err != nil {
+			fmt.Printf("Can't write to %q: %s\n", tfi.target, err)
 			prog.SetExitStatus(1)
 			return err
 		}
