@@ -61,12 +61,15 @@ func addParams(prog *Prog) param.PSetOptFunc {
 			psetter.String[string]{
 				Value: &prog.dir,
 			},
-			"The name of the program to generate or check."+
-				" Note that the name given forms the last part of"+
-				" a directory path, the first part being"+
-				" the current directory."+
-				" If you are creating the program directory"+
-				" the directory must not exist.",
+			"The name of the program to generate or check. Note that"+
+				" the name given should be a directory path, either"+
+				" relative to the current directory or a full path."+
+				"\n\n"+
+				"The last part of the path is the program name."+
+				"\n\n"+
+				"If you are creating the program directory the"+
+				" directory must not exist. If you are checking or"+
+				" fixing a directory then it must exist.",
 			param.Attrs(param.CommandLineOnly),
 			param.AltNames("prog-name", "name"),
 			param.Attrs(param.MustBeSet),
