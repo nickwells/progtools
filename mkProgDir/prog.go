@@ -247,7 +247,8 @@ func (prog *Prog) CheckDir(path string) bool {
 }
 
 // ReportStatErr checks the error returned by os.Stat and reports it
-// appropriately
+// appropriately. If the action is aFix then this will also try to create the
+// file if it is missing.
 func (prog *Prog) ReportStatErr(tfi TemplateFileInfo, err error) {
 	path := tfi.target
 	defer prog.stack.Start("CheckStatErr",
@@ -258,7 +259,7 @@ func (prog *Prog) ReportStatErr(tfi TemplateFileInfo, err error) {
 		if prog.action == aFix {
 			verbose.Printf("%s %30s: %q\n",
 				intro, "fixing missing file", tfi.target)
-			prog.CreateTargetFile(tfi)
+			_ = prog.CreateTargetFile(tfi)
 			return
 		}
 		isOpt := ""
@@ -456,12 +457,6 @@ func (prog *Prog) createFileFunc() fs.WalkDirFunc {
 		err = prog.CreateTargetFile(tfi)
 		if err != nil {
 			fmt.Printf("Can't create %q: %s\n", tfi.target, err)
-			prog.SetExitStatus(1)
-			return err
-		}
-		err = os.WriteFile(tfi.target, []byte(tfi.contents), prog.filePerms)
-		if err != nil {
-			fmt.Printf("Can't write to %q: %s\n", tfi.target, err)
 			prog.SetExitStatus(1)
 			return err
 		}
