@@ -19,6 +19,7 @@ const (
 	paramNameProgName              = "program-name"
 	paramNameAction                = "action"
 	paramNameCheck                 = "check"
+	paramNameFix                   = "fix"
 	paramNamePerms                 = "permissions"
 	paramNameCheckPerms            = "check-permissions"
 	paramNameTemplateDir           = "template-directory"
@@ -53,6 +54,17 @@ func addParams(prog *Prog) param.PSetOptFunc {
 			param.PostAction(
 				func(_ location.L, _ *param.ByName, _ []string) error {
 					prog.action = aCheck
+					return nil
+				}),
+		)
+
+		ps.Add(paramNameFix,
+			psetter.Nil{},
+			"Fix any of the standard files that are not are present."+
+				" This will create the missing files",
+			param.PostAction(
+				func(_ location.L, _ *param.ByName, _ []string) error {
+					prog.action = aFix
 					return nil
 				}),
 		)
