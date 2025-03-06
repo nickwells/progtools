@@ -74,14 +74,17 @@ func checkContentBegins(begins string) checkContentFunc {
 			return 0
 		}
 
+		const maxContentToShow = 40
+
 		s := contents
-		if len(s) > 40 {
-			s = s[:40] + "..."
+		if len(s) > maxContentToShow {
+			s = s[:maxContentToShow] + "..."
 		}
 
 		fmt.Printf("%q has unexpected content\n", path)
 		fmt.Printf("\t   should start with:\n%s\n", begins)
 		fmt.Printf("\tactually starts with:\n%s\n", s)
+
 		return 1
 	}
 }
@@ -94,14 +97,17 @@ func checkContentEnds(ends string) checkContentFunc {
 			return 0
 		}
 
+		const maxContentToShow = 40
+
 		e := contents
-		if len(e) > 40 {
-			e = "..." + e[len(e)-41:]
+		if len(e) > maxContentToShow {
+			e = "..." + e[len(e)-maxContentToShow-1:]
 		}
 
 		fmt.Printf("%q has unexpected content\n", path)
 		fmt.Printf("\t   should end with:\n%s\n", ends)
 		fmt.Printf("\tactually ends with:\n%s\n", e)
+
 		return 1
 	}
 }
@@ -116,6 +122,7 @@ func checkContentContains(contains string) checkContentFunc {
 
 		fmt.Printf("%q has unexpected content\n", path)
 		fmt.Printf("\tdoes not contain:\n%s\n", contains)
+
 		return 1
 	}
 }
@@ -127,6 +134,7 @@ func checkContentDoesNotContain(contains string) checkContentFunc {
 		if strings.Contains(contents, contains) {
 			fmt.Printf("%q has unexpected content\n", path)
 			fmt.Printf("\tcontains:\n%s\n", contains)
+
 			return 1
 		}
 
@@ -146,6 +154,7 @@ func checkContentMatches(reStr string) checkContentFunc {
 
 		fmt.Printf("%q has unexpected content\n", path)
 		fmt.Printf("\tdoes not match:\n%s\n", re)
+
 		return 1
 	}
 }
@@ -160,6 +169,7 @@ func checkContentDoesNotMatch(reStr string) checkContentFunc {
 		if len(re.FindStringSubmatch(contents)) > 0 {
 			fmt.Printf("%q has unexpected content\n", path)
 			fmt.Printf("\tmatches:\n%s\n", re)
+
 			return 1
 		}
 

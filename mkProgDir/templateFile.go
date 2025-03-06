@@ -60,6 +60,7 @@ func trimNumSuffix(path string) string {
 	if idSuffix := idRE.FindString(path); idSuffix != "" {
 		return strings.TrimSuffix(path, idSuffix)
 	}
+
 	return path
 }
 
@@ -80,15 +81,18 @@ func (prog Prog) getTFIContent(tfi *TemplateFileInfo) error {
 	if err != nil {
 		return fmt.Errorf("can't read the template file %q: %w", tfi.path, err)
 	}
+
 	tfi.contents = string(b)
 
 	if tfi.isAGenFile {
 		loc := location.New(tfi.path)
+
 		tfi.contents, err = prog.macroCache.Substitute(string(b), loc)
 		if err != nil {
 			return fmt.Errorf("can't replace macros from %q: %s", tfi.path, err)
 		}
 	}
+
 	return nil
 }
 
@@ -101,6 +105,7 @@ func getCheckTypeSuffix(tfi *TemplateFileInfo, path string) error {
 			return nil
 		}
 	}
+
 	return fmt.Errorf("%q : has no valid check-type suffix", tfi.path)
 }
 
@@ -121,9 +126,11 @@ func (prog Prog) getTemplateFileInfo(path string, d fs.DirEntry,
 	if err != nil {
 		return TemplateFileInfo{}, err
 	}
+
 	if tfi.isAGenFile {
 		path = strings.TrimSuffix(path, sfxGenerate)
 	}
+
 	if strings.HasSuffix(path, sfxOptional) {
 		tfi.isAnOptionalFile = true
 		path = strings.TrimSuffix(path, sfxOptional)
@@ -138,6 +145,7 @@ func (prog Prog) getTemplateFileInfo(path string, d fs.DirEntry,
 		if err != nil {
 			return TemplateFileInfo{}, err
 		}
+
 		path = strings.TrimSuffix(path, tfi.checkTypeSuffix)
 	}
 

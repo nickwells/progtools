@@ -47,6 +47,8 @@ type Prog struct {
 }
 
 // NewProg returns a new Prog instance with the default values set
+//
+//nolint:mnd
 func NewProg() *Prog {
 	mc, err := macros.NewCache()
 	if err != nil {
@@ -60,8 +62,8 @@ func NewProg() *Prog {
 	}
 
 	return &Prog{
-		filePerms:       0o664,
-		dirPerms:        0o775,
+		filePerms:       0o664, // rw-rw-r--
+		dirPerms:        0o775, // rwxrwxr-x
 		action:          aCreate,
 		walkerBase:      tmpl.name,
 		templateDirName: tmpl.name,
@@ -111,7 +113,9 @@ func (prog *Prog) makeFileCheck() fs.WalkDirFunc {
 	return func(path string, d fs.DirEntry, err error) error {
 		defer prog.stack.Start("makeFileCheck",
 			fmt.Sprintf("Start%25s: %q", "template file", path))()
+
 		intro := prog.stack.Tag()
+
 		defer (func() {
 			// checkContentMatches can panic if the regexp doesn't compile
 			if panicVal := recover(); panicVal != nil {
@@ -135,13 +139,16 @@ func (prog *Prog) makeFileCheck() fs.WalkDirFunc {
 		if tfi.isAGenFile {
 			verbose.Printf("%s %30s: %s\n", intro, "", "a generated file")
 		}
+
 		if tfi.isAnOptionalFile {
 			verbose.Printf("%s %30s: %s\n", intro, "", "an optional file")
 		}
+
 		if !tfi.isACheckFile {
 			verboseSkipMsg(intro, "not a check file")
 			return nil
 		}
+
 		verbose.Printf("%s %30s: %s\n", intro, "check-type",
 			tfi.checkTypeSuffix)
 
@@ -172,8 +179,10 @@ func (prog *Prog) Run() {
 	case aCheck, aFix:
 		prog.setFileChecks()
 		prog.CheckAllFiles()
+
 		return
 	}
+
 	fmt.Printf(
 		"Unexpected action: %q - there is no code to handle this action\n",
 		prog.action)
@@ -186,17 +195,19 @@ func (prog *Prog) CreateAllFiles() {
 	intro := prog.stack.Tag()
 
 	verbose.Println(intro, " make program directory")
+
 	err := os.MkdirAll(prog.dir, prog.dirPerms)
 	if err != nil {
 		fmt.Printf("Cannot create the program directory (%q): %s\n",
 			prog.dir, err)
 		prog.SetExitStatus(1)
+
 		return
 	}
 
 	verbose.Println(intro, " walking the template directory")
-	err = fs.WalkDir(prog.templateFS, prog.walkerBase, prog.createFileFunc())
 
+	err = fs.WalkDir(prog.templateFS, prog.walkerBase, prog.createFileFunc())
 	if err != nil {
 		fmt.Printf("Problem found walking the template directory: %s\n", err)
 		prog.SetExitStatus(1)
@@ -220,6 +231,7 @@ func (prog *Prog) CheckPerms(pathType, path string, exp, act fs.FileMode) {
 func (prog *Prog) CheckDir(path string) bool {
 	defer prog.stack.Start("CheckDir",
 		fmt.Sprintf("Start%25s: %q", "directory to check", path))()
+
 	intro := prog.stack.Tag()
 
 	fi, err := os.Stat(path)
@@ -227,18 +239,25 @@ func (prog *Prog) CheckDir(path string) bool {
 		if os.IsNotExist(err) {
 			fmt.Printf("directory %q does not exist\n", path)
 			prog.SetExitStatus(1)
+
 			return false
 		}
+
 		fmt.Printf("Cannot check the directory (%q):\n\t%s\n", path, err)
 		prog.SetExitStatus(1)
+
 		return false
 	}
+
 	verbose.Printf("%s %30s: %s\n", intro, "", "directory exists")
+
 	if !fi.Mode().IsDir() {
 		fmt.Printf("%q is not a directory\n", path)
 		prog.SetExitStatus(1)
+
 		return false
 	}
+
 	verbose.Printf("%s %30s: %s\n", intro, "", "is a directory")
 
 	prog.CheckPerms("Directory", path, prog.dirPerms, fi.Mode()&fs.ModePerm)
@@ -253,27 +272,34 @@ func (prog *Prog) ReportStatErr(tfi TemplateFileInfo, err error) {
 	path := tfi.target
 	defer prog.stack.Start("CheckStatErr",
 		fmt.Sprintf("Start%25s: %q", "file", path))()
+
 	intro := prog.stack.Tag()
 
 	if os.IsNotExist(err) {
 		if prog.action == aFix {
 			verbose.Printf("%s %30s: %q\n",
 				intro, "fixing missing file", tfi.target)
+
 			_ = prog.CreateTargetFile(tfi)
+
 			return
 		}
+
 		isOpt := ""
+
 		if tfi.isAnOptionalFile {
 			if !prog.reportAllFiles {
 				verbose.Printf("%s %30s: %s\n",
 					intro, "", "file does not exist but is optional")
 				return
 			}
+
 			isOpt = " (is optional)"
 		}
 
 		fmt.Printf("%q does not exist%s\n", path, isOpt)
 		prog.SetExitStatus(1)
+
 		return
 	}
 
@@ -287,6 +313,7 @@ func (prog *Prog) CheckContents(tfi TemplateFileInfo, contents string) {
 	path := tfi.target
 	defer prog.stack.Start("CheckFileContents",
 		fmt.Sprintf("Start%25s: %q", "file to check", path))()
+
 	intro := prog.stack.Tag()
 
 	chkFuncs := prog.fileChecks[tfi.target]
@@ -301,6 +328,7 @@ func (prog *Prog) CheckContents(tfi TemplateFileInfo, contents string) {
 			return
 		}
 	}
+
 	verbose.Printf("%s %30s: %s\n", intro, "", "contents OK")
 }
 
@@ -310,6 +338,7 @@ func (prog *Prog) CheckFile(tfi TemplateFileInfo) {
 	path := tfi.target
 	defer prog.stack.Start("CheckFile",
 		fmt.Sprintf("Start%25s: %q", "file to check", path))()
+
 	intro := prog.stack.Tag()
 
 	fi, err := os.Stat(path)
@@ -317,13 +346,16 @@ func (prog *Prog) CheckFile(tfi TemplateFileInfo) {
 		prog.ReportStatErr(tfi, err)
 		return
 	}
+
 	verbose.Printf("%s %30s: %s\n", intro, "", "file exists")
 
 	if !fi.Mode().IsRegular() {
 		fmt.Printf("%q is not a regular file\n", path)
 		prog.SetExitStatus(1)
+
 		return
 	}
+
 	verbose.Printf("%s %30s: %s\n", intro, "", "is a regular file")
 
 	prog.CheckPerms("File", path, prog.filePerms, fi.Mode()&fs.ModePerm)
@@ -332,8 +364,10 @@ func (prog *Prog) CheckFile(tfi TemplateFileInfo) {
 	if err != nil {
 		fmt.Printf("File: %q can't be read: %s", path, err)
 		prog.SetExitStatus(1)
+
 		return
 	}
+
 	verbose.Printf("%s %30s: %s\n", intro, "", "can be read")
 
 	prog.CheckContents(tfi, string(contents))
@@ -350,6 +384,7 @@ func (prog *Prog) CheckAllFiles() {
 	}
 
 	verbose.Println(intro, " walking the template directory")
+
 	err := fs.WalkDir(prog.templateFS, prog.walkerBase, prog.checkFileFunc())
 	if err != nil {
 		fmt.Printf("Problem found walking the template directory: %s\n", err)
@@ -363,11 +398,13 @@ func (prog *Prog) checkFileFunc() fs.WalkDirFunc {
 	return func(path string, d fs.DirEntry, err error) error {
 		defer prog.stack.Start("checkFileFunc",
 			fmt.Sprintf("Start%25s: %q", "template file", path))()
+
 		intro := prog.stack.Tag()
 
 		if err != nil {
 			fmt.Println(err)
 			prog.SetExitStatus(1)
+
 			return nil
 		}
 
@@ -381,6 +418,7 @@ func (prog *Prog) checkFileFunc() fs.WalkDirFunc {
 			verboseSkipMsg(intro, "is the template dir")
 			return nil
 		}
+
 		if tfi.isACheckFile {
 			verboseSkipMsg(intro, "is a check file")
 			return nil
@@ -396,6 +434,7 @@ func (prog *Prog) checkFileFunc() fs.WalkDirFunc {
 		}
 
 		prog.CheckFile(tfi)
+
 		return nil
 	}
 }
@@ -408,6 +447,7 @@ func (prog *Prog) CreateTargetFile(tfi TemplateFileInfo) error {
 		fmt.Printf("Can't create %q: %s\n", tfi.target, err)
 		prog.SetExitStatus(1)
 	}
+
 	return err
 }
 
@@ -417,6 +457,7 @@ func (prog *Prog) createFileFunc() fs.WalkDirFunc {
 	return func(path string, d fs.DirEntry, err error) error {
 		defer prog.stack.Start("createFileFunc",
 			fmt.Sprintf("Start%25s: %q", "template file", path))()
+
 		intro := prog.stack.Tag()
 
 		if err != nil {
@@ -434,6 +475,7 @@ func (prog *Prog) createFileFunc() fs.WalkDirFunc {
 			verboseSkipMsg(intro, "is the template dir")
 			return nil
 		}
+
 		if tfi.isACheckFile {
 			verboseSkipMsg(intro, "is a check file")
 			return nil
@@ -451,6 +493,7 @@ func (prog *Prog) createFileFunc() fs.WalkDirFunc {
 				fmt.Printf("Can't create directory %q: %s\n", tfi.target, err)
 				prog.SetExitStatus(1)
 			}
+
 			return err
 		}
 
@@ -458,10 +501,12 @@ func (prog *Prog) createFileFunc() fs.WalkDirFunc {
 		if err != nil {
 			fmt.Printf("Can't create %q: %s\n", tfi.target, err)
 			prog.SetExitStatus(1)
+
 			return err
 		}
 
 		verbose.Printf("%s %30s: %s\n", intro, "", "file created")
+
 		return nil
 	}
 }
@@ -480,6 +525,7 @@ func (prog Prog) makeNewPath(path string) string {
 	pathParts := splitPath(path)
 
 	pathParts = slices.Insert[[]string, string](pathParts, 0, prog.dir)
+
 	return filepath.Join(pathParts...)
 }
 
@@ -487,11 +533,14 @@ func (prog Prog) makeNewPath(path string) string {
 // fs) into a slice of parts
 func splitPath(fsPath string) []string {
 	results := []string{}
+
 	for ; fsPath != "." && fsPath != "/"; fsPath = path.Dir(fsPath) {
 		file := path.Base(fsPath)
 		results = append(results, file)
 	}
+
 	slices.Reverse[[]string, string](results)
+
 	return results
 }
 

@@ -12,6 +12,7 @@ func TestCheckTypeMap(t *testing.T) {
 		t.Errorf("\tthe checkTypeMap has %d entries, checkTypes has %d\n",
 			len(checkTypeMap), len(checkTypes))
 	}
+
 	for _, ct := range checkTypes {
 		if _, ok := checkTypeMap[ct.suffix]; !ok {
 			t.Log("Bad check type info")
@@ -22,6 +23,7 @@ func TestCheckTypeMap(t *testing.T) {
 
 func TestCheckTypeFuncs(t *testing.T) {
 	const testPath = "test/file/path"
+
 	const testText = `start
 line 1
 line 2
@@ -157,16 +159,20 @@ end
 			if !ok {
 				t.Log(tc.IDStr())
 				t.Errorf("\t: bad suffix: %q\n", tc.suffix)
+
 				return
 			}
+
 			ccFunc = ccFuncMaker(tc.paramText)
 		})
 		testhelper.CheckExpPanicError(t, panicked, panicVal, tc)
+
 		if !panicked {
 			fio, err := testhelper.NewStdioFromString("")
 			if err != nil {
 				t.Log(tc.IDStr())
 				t.Errorf("unexpected error while redirecting IO: %s\n", err)
+
 				continue
 			}
 
@@ -179,12 +185,15 @@ end
 			if err != nil {
 				t.Log(tc.IDStr())
 				t.Errorf("\tunexpected error restoring IO: %s\n", err)
+
 				continue
 			}
+
 			if len(stderr) != 0 {
 				t.Log(tc.IDStr())
 				t.Errorf("\tunexpected error output: %s\n", string(stderr))
 			}
+
 			testhelper.DiffString[string](t,
 				tc.IDStr(), "std output",
 				string(stdout), tc.expOutput)

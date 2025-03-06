@@ -1,6 +1,6 @@
 module github.com/nickwells/progtools
 
-go 1.21.0
+go 1.24
 
 require (
 	github.com/nickwells/check.mod/v2 v2.1.14

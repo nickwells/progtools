@@ -17,13 +17,17 @@ const (
 // addNotes adds the notes, if any, for this program
 func addNotes(prog *Prog) param.PSetOptFunc {
 	checkTypeNotes := ""
+
 	var ctiContains checkTypeInfo
+
 	for _, cti := range checkTypes {
 		checkTypeNotes += "- " + cti.suffix + " : " + cti.desc + "\n"
+
 		if cti.suffix == containsSuffix {
 			ctiContains = cti
 		}
 	}
+
 	if ctiContains.suffix == "" {
 		panic(fmt.Errorf("%q is not in the list of check types",
 			containsSuffix))

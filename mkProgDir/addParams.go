@@ -88,12 +88,14 @@ func addParams(prog *Prog) param.PSetOptFunc {
 			param.PostAction(
 				func(_ location.L, _ *param.ByName, _ []string) error {
 					dir := filepath.Clean(prog.dir)
+
 					prog.name = filepath.Base(dir)
 					if len(prog.name) == 0 {
 						return fmt.Errorf(
 							"bad name - last part of the path (%q) is empty",
 							prog.dir)
 					}
+
 					return check.StringMatchesPattern[string](
 						progNameRE,
 						"a string starting with a letter and"+
@@ -118,15 +120,21 @@ func addParams(prog *Prog) param.PSetOptFunc {
 				func(_ location.L, _ *param.ByName, _ []string) error {
 					prog.templateFS = os.DirFS(prog.templateDirName)
 					prog.walkerBase = "."
+
 					return nil
 				}),
+		)
+
+		const (
+			maxPerms       = 0o777
+			dirSearchPerms = 0o111
 		)
 
 		ps.Add(paramNamePerms,
 			psetter.Uint[fs.FileMode]{
 				Value: &prog.filePerms,
 				Checks: []check.ValCk[fs.FileMode]{
-					check.ValLE[fs.FileMode](0o777),
+					check.ValLE[fs.FileMode](maxPerms),
 				},
 			},
 			"The permissions to create files with."+
@@ -137,7 +145,7 @@ func addParams(prog *Prog) param.PSetOptFunc {
 				" execute (search) permission set.",
 			param.PostAction(
 				func(_ location.L, _ *param.ByName, _ []string) error {
-					prog.dirPerms = prog.filePerms | 0o111
+					prog.dirPerms = prog.filePerms | dirSearchPerms
 					return nil
 				}),
 		)
@@ -176,6 +184,7 @@ func addParams(prog *Prog) param.PSetOptFunc {
 						" is still to create the directory",
 					english.Join(reportAllParam.WhereSet(), ", ", " and "))
 			}
+
 			return nil
 		})
 
@@ -183,7 +192,9 @@ func addParams(prog *Prog) param.PSetOptFunc {
 			if prog.dir == "" {
 				return nil
 			}
+
 			var provisos filecheck.Provisos
+
 			switch prog.action {
 			case aCreate:
 				provisos = filecheck.Provisos{
@@ -195,6 +206,7 @@ func addParams(prog *Prog) param.PSetOptFunc {
 					Checks:    []check.FileInfo{check.FileInfoIsDir},
 				}
 			}
+
 			return provisos.StatusCheck(prog.dir)
 		})
 
