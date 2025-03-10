@@ -3,15 +3,15 @@ module github.com/nickwells/progtools
 go 1.24
 
 require (
-	github.com/nickwells/check.mod/v2 v2.1.15
-	github.com/nickwells/english.mod v1.1.6
-	github.com/nickwells/filecheck.mod v1.2.1
+	github.com/nickwells/check.mod/v2 v2.1.16
+	github.com/nickwells/english.mod v1.2.0
+	github.com/nickwells/filecheck.mod v1.2.2
 	github.com/nickwells/location.mod v1.2.28
-	github.com/nickwells/macros.mod v1.1.2
-	github.com/nickwells/param.mod/v6 v6.2.0
+	github.com/nickwells/macros.mod v1.1.3
+	github.com/nickwells/param.mod/v6 v6.2.1
 	github.com/nickwells/testhelper.mod/v2 v2.3.1
-	github.com/nickwells/verbose.mod v1.1.5
-	github.com/nickwells/versionparams.mod v1.2.10
+	github.com/nickwells/verbose.mod v1.1.6
+	github.com/nickwells/versionparams.mod v1.2.11
 )
 
 require (
