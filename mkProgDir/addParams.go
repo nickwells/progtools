@@ -44,6 +44,7 @@ func addParams(prog *Prog) param.PSetOptFunc {
 				},
 			},
 			"The action to perform.",
+			param.SeeAlso(paramNameCheck, paramNameFix),
 			param.Attrs(param.CommandLineOnly),
 			param.AltNames("a"),
 		)
@@ -51,6 +52,7 @@ func addParams(prog *Prog) param.PSetOptFunc {
 		ps.Add(paramNameCheck,
 			psetter.Nil{},
 			"Check that all the standard files are present.",
+			param.SeeAlso(paramNameAction, paramNameFix),
 			param.PostAction(
 				func(_ location.L, _ *param.ByName, _ []string) error {
 					prog.action = aCheck
@@ -62,6 +64,7 @@ func addParams(prog *Prog) param.PSetOptFunc {
 			psetter.Nil{},
 			"Fix any of the standard files that are not are present."+
 				" This will create the missing files",
+			param.SeeAlso(paramNameAction, paramNameCheck),
 			param.PostAction(
 				func(_ location.L, _ *param.ByName, _ []string) error {
 					prog.action = aFix
