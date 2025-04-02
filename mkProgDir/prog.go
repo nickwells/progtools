@@ -360,7 +360,7 @@ func (prog *Prog) CheckFile(tfi TemplateFileInfo) {
 
 	prog.CheckPerms("File", path, prog.filePerms, fi.Mode()&fs.ModePerm)
 
-	contents, err := os.ReadFile(path)
+	contents, err := os.ReadFile(path) //nolint:gosec
 	if err != nil {
 		fmt.Printf("File: %q can't be read: %s", path, err)
 		prog.SetExitStatus(1)
