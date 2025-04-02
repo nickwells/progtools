@@ -11,7 +11,7 @@ const (
 )
 
 // addNotes adds the notes for this program.
-func addNotes(_ *Prog) param.PSetOptFunc {
+func addNotes(_ *prog) param.PSetOptFunc {
 	return func(ps *param.PSet) error {
 		// TODO: add notes for the program
 		// ps.AddNote(noteNameXxx, "text")

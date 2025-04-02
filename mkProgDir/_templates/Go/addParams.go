@@ -9,7 +9,7 @@ const (
 )
 
 // addParams adds the parameters for this program
-func addParams(prog *Prog) param.PSetOptFunc {
+func addParams(prog *prog) param.PSetOptFunc {
 	return func(ps *param.PSet) error {
 		// TODO: add parameters, final-checks, parameter groups etc
 		// ps.Add(paramNameXxx, psetter.Xxx{Value: &prog.xxx},"Xxx param desc")

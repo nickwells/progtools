@@ -3,10 +3,10 @@ package main
 import "os"
 
 func main() {
-	prog := NewProg()
+	prog := newProg()
 	ps := makeParamSet(prog)
 	ps.Parse()
 
-	prog.Run()
+	prog.run()
 	os.Exit(prog.exitStatus)
 }
