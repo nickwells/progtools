@@ -6,7 +6,11 @@ import "github.com/nickwells/verbose.mod/verbose"
 type prog struct {
 	exitStatus int
 	stack      *verbose.Stack
+	// parameters
 	// TODO: add the program parameter values
+
+	// program data
+	// TODO: add the program data members (if any)
 }
 
 // newProg returns a new Prog instance with the default values set
