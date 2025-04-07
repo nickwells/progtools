@@ -22,13 +22,14 @@ func TestCheckTypeMap(t *testing.T) {
 }
 
 func TestCheckTypeFuncs(t *testing.T) {
-	const testPath = "test/file/path"
-
-	const testText = `start
+	const (
+		testPath = "test/file/path"
+		testText = `start
 line 1
 line 2
 end
 `
+	)
 
 	testCases := []struct {
 		testhelper.ID
@@ -51,7 +52,7 @@ end
 			expRval:   1,
 			expOutput: `"` + testPath + `" has unexpected content` +
 				"\n" +
-				"\t   should start with:\n" +
+				"\tit should start with:\n" +
 				"start\n" +
 				"bad line\n" +
 				"\tactually starts with:\n" +
@@ -70,7 +71,7 @@ end
 			expRval:   1,
 			expOutput: `"` + testPath + `" has unexpected content` +
 				"\n" +
-				"\t   should end with:\n" +
+				"\tit should end with:\n" +
 				"line 2\n" +
 				"bad ending\n" +
 				"\n" +

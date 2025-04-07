@@ -74,7 +74,9 @@ func checkContentBegins(begins string) checkContentFunc {
 			return 0
 		}
 
-		const maxContentToShow = 40
+		const minMaxContentLen = 40
+
+		maxContentToShow := max(len(begins), minMaxContentLen)
 
 		s := contents
 		if len(s) > maxContentToShow {
@@ -82,7 +84,7 @@ func checkContentBegins(begins string) checkContentFunc {
 		}
 
 		fmt.Printf("%q has unexpected content\n", path)
-		fmt.Printf("\t   should start with:\n%s\n", begins)
+		fmt.Printf("\tit should start with:\n%s\n", begins)
 		fmt.Printf("\tactually starts with:\n%s\n", s)
 
 		return 1
@@ -97,7 +99,9 @@ func checkContentEnds(ends string) checkContentFunc {
 			return 0
 		}
 
-		const maxContentToShow = 40
+		const minMaxContentLen = 40
+
+		maxContentToShow := max(len(ends), minMaxContentLen)
 
 		e := contents
 		if len(e) > maxContentToShow {
@@ -105,7 +109,7 @@ func checkContentEnds(ends string) checkContentFunc {
 		}
 
 		fmt.Printf("%q has unexpected content\n", path)
-		fmt.Printf("\t   should end with:\n%s\n", ends)
+		fmt.Printf("\tit should end with:\n%s\n", ends)
 		fmt.Printf("\tactually ends with:\n%s\n", e)
 
 		return 1
