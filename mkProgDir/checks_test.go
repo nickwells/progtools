@@ -177,7 +177,7 @@ end
 			}
 
 			ccFuncRval := ccFunc(testPath, testText)
-			testhelper.DiffInt[int](t,
+			testhelper.DiffInt(t,
 				tc.IDStr(), "check func return value",
 				ccFuncRval, tc.expRval)
 
@@ -194,7 +194,7 @@ end
 				t.Errorf("\tunexpected error output: %s\n", string(stderr))
 			}
 
-			testhelper.DiffString[string](t,
+			testhelper.DiffString(t,
 				tc.IDStr(), "std output",
 				string(stdout), tc.expOutput)
 		}
