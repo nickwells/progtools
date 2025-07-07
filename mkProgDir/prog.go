@@ -192,6 +192,7 @@ func (prog *Prog) Run() {
 // contain.
 func (prog *Prog) CreateAllFiles() {
 	defer prog.stack.Start("CreateAllFiles", "Start")()
+
 	intro := prog.stack.Tag()
 
 	verbose.Println(intro, " make program directory")
@@ -291,6 +292,7 @@ func (prog *Prog) ReportStatErr(tfi TemplateFileInfo, err error) {
 			if !prog.reportAllFiles {
 				verbose.Printf("%s %30s: %s\n",
 					intro, "", "file does not exist but is optional")
+
 				return
 			}
 
@@ -377,6 +379,7 @@ func (prog *Prog) CheckFile(tfi TemplateFileInfo) {
 // contain.
 func (prog *Prog) CheckAllFiles() {
 	defer prog.stack.Start("CheckAllFiles", "Start")()
+
 	intro := prog.stack.Tag()
 
 	if !prog.CheckDir(prog.dir) {

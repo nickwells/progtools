@@ -1,1 +1,3 @@
+# ignore any binaries generated if you run 'go build' in the
+# source directory
 ${ProgName}
