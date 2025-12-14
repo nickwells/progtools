@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/nickwells/param.mod/v6/param"
 )
@@ -16,12 +17,16 @@ const (
 
 // addNotes adds the notes, if any, for this program
 func addNotes(prog *Prog) param.PSetOptFunc {
-	checkTypeNotes := ""
+	var checkTypeNotes strings.Builder
 
 	var ctiContains checkTypeInfo
 
 	for _, cti := range checkTypes {
-		checkTypeNotes += "- " + cti.suffix + " : " + cti.desc + "\n"
+		checkTypeNotes.WriteString("- ")
+		checkTypeNotes.WriteString(cti.suffix)
+		checkTypeNotes.WriteString(" : ")
+		checkTypeNotes.WriteString(cti.desc)
+		checkTypeNotes.WriteString("\n")
 
 		if cti.suffix == containsSuffix {
 			ctiContains = cti
@@ -33,9 +38,14 @@ func addNotes(prog *Prog) param.PSetOptFunc {
 			containsSuffix))
 	}
 
-	genMacroNotes := ""
+	var genMacroNotes strings.Builder
+
 	for _, mi := range availableMacros {
-		genMacroNotes += "- " + mi.name + " : " + mi.desc + "\n"
+		genMacroNotes.WriteString("- ")
+		genMacroNotes.WriteString(mi.name)
+		genMacroNotes.WriteString(" : ")
+		genMacroNotes.WriteString(mi.desc)
+		genMacroNotes.WriteString("\n")
 	}
 
 	noteNames := []string{
@@ -74,7 +84,7 @@ func addNotes(prog *Prog) param.PSetOptFunc {
 				" template file but with the suffix removed."+
 				" The following macro substitutions are allowed:"+
 				"\n"+
-				genMacroNotes+
+				genMacroNotes.String()+
 				"\n"+
 				"The macro name must be surrounded"+
 				" by '"+startMacro+"' and '"+endMacro+"'.",
@@ -94,7 +104,7 @@ func addNotes(prog *Prog) param.PSetOptFunc {
 				" type of check should be performed. The following"+
 				" check-type suffixes are allowed:"+
 				"\n"+
-				checkTypeNotes+
+				checkTypeNotes.String()+
 				"\n"+
 				"If the check to be performed on the contents of the file"+
 				" relies on values that need to have macro substitution"+
