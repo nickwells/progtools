@@ -11,8 +11,8 @@ import (
 	"github.com/nickwells/english.mod/english"
 	"github.com/nickwells/filecheck.mod/filecheck"
 	"github.com/nickwells/location.mod/location"
-	"github.com/nickwells/param.mod/v6/param"
-	"github.com/nickwells/param.mod/v6/psetter"
+	"github.com/nickwells/param.mod/v7/param"
+	"github.com/nickwells/param.mod/v7/psetter"
 )
 
 const (
@@ -54,7 +54,7 @@ func addParams(prog *Prog) param.PSetOptFunc {
 			"Check that all the standard files are present.",
 			param.SeeAlso(paramNameAction, paramNameFix),
 			param.PostAction(
-				func(_ location.L, _ *param.ByName, _ []string) error {
+				func(_ location.L, _ *param.BaseParam, _ []string) error {
 					prog.action = aCheck
 					return nil
 				}),
@@ -66,7 +66,7 @@ func addParams(prog *Prog) param.PSetOptFunc {
 				" This will create the missing files",
 			param.SeeAlso(paramNameAction, paramNameCheck),
 			param.PostAction(
-				func(_ location.L, _ *param.ByName, _ []string) error {
+				func(_ location.L, _ *param.BaseParam, _ []string) error {
 					prog.action = aFix
 					return nil
 				}),
@@ -89,7 +89,7 @@ func addParams(prog *Prog) param.PSetOptFunc {
 			param.AltNames("prog-name", "name"),
 			param.Attrs(param.MustBeSet),
 			param.PostAction(
-				func(_ location.L, _ *param.ByName, _ []string) error {
+				func(_ location.L, _ *param.BaseParam, _ []string) error {
 					dir := filepath.Clean(prog.dir)
 
 					prog.name = filepath.Base(dir)
@@ -120,7 +120,7 @@ func addParams(prog *Prog) param.PSetOptFunc {
 				" from which to generate the program.",
 			param.AltNames("template-dir", "template"),
 			param.PostAction(
-				func(_ location.L, _ *param.ByName, _ []string) error {
+				func(_ location.L, _ *param.BaseParam, _ []string) error {
 					prog.templateFS = os.DirFS(prog.templateDirName)
 					prog.walkerBase = "."
 
@@ -147,7 +147,7 @@ func addParams(prog *Prog) param.PSetOptFunc {
 				" Note also that directories are created with"+
 				" execute (search) permission set.",
 			param.PostAction(
-				func(_ location.L, _ *param.ByName, _ []string) error {
+				func(_ location.L, _ *param.BaseParam, _ []string) error {
 					prog.dirPerms = prog.filePerms | dirSearchPerms
 					return nil
 				}),
