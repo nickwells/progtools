@@ -11,6 +11,7 @@ import (
 	"github.com/nickwells/english.mod/english"
 	"github.com/nickwells/filecheck.mod/filecheck"
 	"github.com/nickwells/location.mod/location"
+	"github.com/nickwells/param.mod/v7/paction"
 	"github.com/nickwells/param.mod/v7/param"
 	"github.com/nickwells/param.mod/v7/psetter"
 )
@@ -53,11 +54,7 @@ func addParams(prog *Prog) param.PSetOptFunc {
 			psetter.Nil{},
 			"Check that all the standard files are present.",
 			param.SeeAlso(paramNameAction, paramNameFix),
-			param.PostAction(
-				func(_ location.L, _ *param.BaseParam, _ []string) error {
-					prog.action = aCheck
-					return nil
-				}),
+			param.PostAction(paction.SetVal(&prog.action, aCheck)),
 		)
 
 		ps.Add(paramNameFix,
@@ -65,11 +62,7 @@ func addParams(prog *Prog) param.PSetOptFunc {
 			"Fix any of the standard files that are not are present."+
 				" This will create the missing files",
 			param.SeeAlso(paramNameAction, paramNameCheck),
-			param.PostAction(
-				func(_ location.L, _ *param.BaseParam, _ []string) error {
-					prog.action = aFix
-					return nil
-				}),
+			param.PostAction(paction.SetVal(&prog.action, aFix)),
 		)
 
 		ps.Add(paramNameProgName,
